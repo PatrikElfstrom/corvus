@@ -1,0 +1,11 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: corvus:local
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./dev/data:/app/data
+    restart: unless-stopped

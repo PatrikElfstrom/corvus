@@ -1,0 +1,15 @@
+{
+  "short_name": "corvus",
+  "name": "corvus",
+  "icons": [
+    {
+      "src": "corvus.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 24 24" fill="none"
+  stroke="url(#corvus-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <defs>
+    <linearGradient id="corvus-gradient" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="10.9%" stop-color="rgba(175,237,255,1)" />
+      <stop offset="63.8%" stop-color="rgba(255,163,252,1)" />
+    </linearGradient>
+  </defs>
+  <path stroke="rgba(175,237,255,1)" d="M16 7h.01"></path>
+  <path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"></path>
+  <path stroke="rgba(175,237,255,1)" d="m20 7 2 .5-2 .5"></path>
+  <path stroke="rgba(255,163,252,1)" d="M10 18v3"></path>
+  <path stroke="rgba(255,163,252,1)" d="M14 17.75V21"></path>
+  <path d="M7 18a6 6 0 0 0 3.84-10.61"></path>
+</svg>

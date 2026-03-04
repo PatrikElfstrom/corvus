@@ -1,0 +1,23 @@
+{
+  "files": {
+    "includes": ["src/**/*.tsx", "src/**/*.ts", "public/**", "scripts/**/*.ts"]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "useHookAtTopLevel": "off"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+services:
+  app:
+    image: ghcr.io/patrikelfstrom/corvus:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - data:/app/data
+    restart: unless-stopped
+
+volumes:
+  data:
