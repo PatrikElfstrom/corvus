@@ -9,7 +9,7 @@ import {
 const ONE_HOUR_SECONDS = 60 * 60;
 
 export default defineCachedHandler(
-  (event) => {
+  async (event) => {
     const headerValue = event.req.headers.get('Sec-CH-Prefers-Color-Scheme');
 
     const colorScheme: CalendarColorScheme =
@@ -17,17 +17,18 @@ export default defineCachedHandler(
     const theme: CalendarTheme =
       getQuery(event).theme === 'github' ? 'github' : 'corvus';
 
-    event.res.headers.set('content-type', 'image/svg+xml; charset=utf-8');
-    event.res.headers.set('accept-ch', 'Sec-CH-Prefers-Color-Scheme');
-    event.res.headers.set('critical-ch', 'Sec-CH-Prefers-Color-Scheme');
-    event.res.headers.set('vary', 'Sec-CH-Prefers-Color-Scheme');
-    event.res.headers.set('permissions-policy', 'ch-prefers-color-scheme=*');
-    event.res.headers.set(
-      'cache-control',
-      `public, max-age=${ONE_HOUR_SECONDS}`,
-    );
+    const svg = await renderRollingYearsSvg(1, colorScheme, theme);
 
-    return renderRollingYearsSvg(1, colorScheme, theme);
+    return new Response(svg, {
+      headers: {
+        'content-type': 'image/svg+xml; charset=utf-8',
+        'accept-ch': 'Sec-CH-Prefers-Color-Scheme',
+        'critical-ch': 'Sec-CH-Prefers-Color-Scheme',
+        vary: 'Sec-CH-Prefers-Color-Scheme',
+        'permissions-policy': 'ch-prefers-color-scheme=*',
+        'cache-control': `public, max-age=${ONE_HOUR_SECONDS}`,
+      },
+    });
   },
   {
     maxAge: ONE_HOUR_SECONDS,
