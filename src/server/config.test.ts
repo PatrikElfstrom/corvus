@@ -261,11 +261,10 @@ test('loadConfig ignores non-renderable custom themes and logs a warning', async
       const originalWarn = logger.warn;
       const warningMessages: Array<string> = [];
 
-      (logger as unknown as { warn: (...args: Array<unknown>) => void }).warn = (
-        ...args: Array<unknown>
-      ) => {
-        warningMessages.push(String(args.at(-1)));
-      };
+      (logger as unknown as { warn: (...args: Array<unknown>) => void }).warn =
+        (...args: Array<unknown>) => {
+          warningMessages.push(String(args.at(-1)));
+        };
 
       try {
         const themes = loadConfig().themes;
@@ -306,11 +305,10 @@ themes:
       const originalWarn = logger.warn;
       const warningMessages: Array<string> = [];
 
-      (logger as unknown as { warn: (...args: Array<unknown>) => void }).warn = (
-        ...args: Array<unknown>
-      ) => {
-        warningMessages.push(String(args.at(-1)));
-      };
+      (logger as unknown as { warn: (...args: Array<unknown>) => void }).warn =
+        (...args: Array<unknown>) => {
+          warningMessages.push(String(args.at(-1)));
+        };
 
       try {
         const config = loadConfig();

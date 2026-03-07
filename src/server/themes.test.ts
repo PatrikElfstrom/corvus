@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { getInvalidThemeReason, parseColorScheme, parseThemeName } from './themes.ts';
+import {
+  getInvalidThemeReason,
+  parseColorScheme,
+  parseThemeName,
+} from './themes.ts';
 
 test('parseThemeName accepts exact configured theme names', () => {
   const theme = parseThemeName('fuchsia', {

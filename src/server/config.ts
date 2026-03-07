@@ -11,9 +11,9 @@ import { z } from 'zod';
 import { readEnv } from './env.ts';
 import { logger } from './logger.ts';
 import {
+  themes as builtInThemes,
   DEFAULT_THEME_NAME,
   getInvalidThemeReason,
-  themes as builtInThemes,
   mergeThemes,
   type ThemeMap,
   themeSchema,
