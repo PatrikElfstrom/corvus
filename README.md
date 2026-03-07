@@ -168,6 +168,8 @@ bun install
 bun run dev
 ```
 
+`bun install` also runs `lefthook install`, so `git push` will execute `bun run verify` from [lefthook.yml](/Users/patrikelfstrom/projects/corvus/lefthook.yml).
+
 ### Add a provider
 
 1. Create `src/server/providers/<provider>/manifest.ts` with provider options schema and normalization.
