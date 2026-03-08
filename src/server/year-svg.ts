@@ -1,6 +1,6 @@
 import * as Plot from '@observablehq/plot';
 import { utcMonth } from 'd3';
-import { JSDOM } from 'jsdom';
+import { Window } from 'happy-dom';
 import { loadConfig } from './config.ts';
 import { getDatabase, initDatabaseSchema } from './db/index.ts';
 import {
@@ -121,6 +121,12 @@ function subtractUtcYears(value: Date, years: number): Date {
   ).getUTCDate();
   const clampedDay = Math.min(day, maxDay);
   return new Date(Date.UTC(targetYear, targetMonth, clampedDay));
+}
+
+function createPlotDocument(): Document {
+  // Plot is typed against the standard DOM lib, while happy-dom exposes its
+  // own compatible classes. Cast once at the integration boundary.
+  return new Window().document as unknown as Document;
 }
 
 export function getFixedWeekWindow(totalWeeks: number): {
@@ -343,7 +349,7 @@ export function renderCalendarSvg(
     return EMPTY_SVG;
   }
 
-  const document = new JSDOM('').window.document;
+  const document = createPlotDocument();
   const weekCount =
     Math.max(...activities.map((activity) => activity.weekIndex)) + 1;
   const textColor = TEXT_COLORS[colorScheme];
