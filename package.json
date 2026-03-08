@@ -18,7 +18,6 @@
     "build": "nitro build",
     "start": "bun .output/server/index.mjs",
     "corvus": "bun scripts/cli.ts",
-    "prepare": "lefthook install",
     "test": "bun test",
     "typecheck": "bunx tsc --noEmit",
     "biome:ci": "bunx @biomejs/biome ci .",

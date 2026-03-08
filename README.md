@@ -165,10 +165,9 @@ For progress and final results, check `data/app.log` (or container logs).
 
 ```bash
 bun install
+bunx lefthook install
 bun run dev
 ```
-
-`bun install` also runs `lefthook install`, so `git push` will execute `bun run verify` from [lefthook.yml](/Users/patrikelfstrom/projects/corvus/lefthook.yml).
 
 ### Add a provider
 
