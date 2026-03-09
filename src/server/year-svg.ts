@@ -69,6 +69,25 @@ const LEGEND_LABELS = {
   less: 'Less',
   more: 'More',
 } as const;
+
+const TITLE_LABEL_CONTRIBUTIONS = (count: number, date: string) => {
+  if (count === 0) {
+    return `No contributions on ${date}.`;
+  }
+  if (count === 1) {
+    return `${count} contribution on ${date}.`;
+  }
+  return `${count} contributions on ${date}.`;
+};
+
+const TITLE_LABEL_SWATCH = (index: number) => {
+  if (index === 1) {
+    return `${index} contribution`;
+  } else if (index >= 4) {
+    return `${index}+ contributions`;
+  }
+  return `${index} contributions`;
+};
 const FONT_STACK =
   '-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif';
 const TEXT_COLORS: Record<CalendarColorScheme, string> = {
@@ -371,6 +390,17 @@ function appendMonthLabels(
   svg.append(labelsGroup);
 }
 
+function getCellTitle(activity: PlotActivity): string {
+  const date = new Date(activity.date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+
+  return TITLE_LABEL_CONTRIBUTIONS(activity.count, date);
+}
+
 export function renderCalendarSvg(
   activities: Array<PlotActivity>,
   colorScheme: CalendarColorScheme | undefined,
@@ -435,7 +465,7 @@ export function renderCalendarSvg(
         inset: CELL_INSET,
         rx: CELL_RADIUS,
         ry: CELL_RADIUS,
-        title: (activity) => `${activity.date}: ${activity.count} activities`,
+        title: getCellTitle,
       }),
     ],
   }) as PlotSvgElement;
@@ -490,6 +520,11 @@ export function renderCalendarSvg(
     swatch.setAttribute('fill', getThemeFill(index));
     swatch.setAttribute('stroke', CELL_BORDER);
     swatch.setAttribute('stroke-width', String(CELL_BORDER_WIDTH));
+
+    const swatchTitle = document.createElementNS(SVG_NAMESPACE, 'title');
+    swatchTitle.textContent = TITLE_LABEL_SWATCH(index);
+    swatch.append(swatchTitle);
+
     legendGroup.append(swatch);
   });
 
