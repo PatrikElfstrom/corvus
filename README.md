@@ -41,6 +41,7 @@ docker run --rm -p 3000:3000 -v corvus-data:/app/data ghcr.io/patrikelfstrom/cor
 ## Config
 
 ### Integrations
+
 Integrations are configured in `data/integrations.yaml`.
 You can add multiple integrations with different providers and filters.
 
@@ -76,12 +77,9 @@ Additional options and filters are available:
 integrations:
   - id: github-main
     provider: github
-    enabled: true
     auth:
       username: octocat
       token: ghp_xxx
-    source:
-      base_url: https://api.github.com
     filters:
       author_include:
         - octocat
@@ -89,9 +87,22 @@ integrations:
       repository_exclude:
         - experimental
 
+  - id: gitea-personal
+    provider: gitea
+    source:
+      base_url: http://localhost:3123
+    auth:
+      username: yorkshire
+      token: a942xxx
+    filters:
+      author_include:
+        - yorkshire
+        - yorkshire@example.com
+      repository_exclude:
+        - experimental
+
   - id: local-work
     provider: filepath
-    enabled: true
     source:
       path: /Users/example/projects
       depth: 2
@@ -102,6 +113,16 @@ integrations:
         - archive
 ```
 
+#### Required API scopes:
+
+| Provider  | Required scopes                                                                                              |
+| --------- | ------------------------------------------------------------------------------------------------------------ |
+| GitHub    | `repo`                                                                                                       |
+| GitLab    | `read_api`                                                                                                   |
+| Bitbucket | `read:pullrequest:bitbucket`, `read:workspace:bitbucket`, `read:user:bitbucket`, `read:repository:bitbucket` |
+| Gitea     | `read:repository`, `read:user`                                                                               |
+| Forgejo   | `read:repository`, `read:user`                                                                               |
+
 ### Themes
 
 Corvus comes with two built-in themes, `corvus` and `github`, which can be selected by setting the default `theme` property in `data/config.yaml` or with the `theme` query parameter, for example `/year.svg?theme=github`.
@@ -111,6 +132,7 @@ theme: github
 ```
 
 #### Custom themes
+
 You can also create custom themes under the `themes` property in `data/config.yaml`:
 
 ```yaml
@@ -128,12 +150,12 @@ themes:
       - "#c51b8a"
       - "#f768a1"
       - "#fbb4b9"
-
 ```
+
 Custom themes are available in addition to the built-in themes and can still be overridden with the `theme` query parameter, for example `/year.svg?theme=fuchsia`.
 
-
 #### Dark mode
+
 Corvus supports dark mode and the calendar will automatically switch between light and dark themes using CSS `prefers-color-scheme` inside the generated SVG. This allows embedded SVGs to follow the surrounding page's color scheme.
 
 ## Environment defaults
