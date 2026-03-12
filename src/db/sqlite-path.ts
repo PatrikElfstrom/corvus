@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, renameSync } from 'node:fs';
 import path from 'node:path';
-import { readEnv } from '../env.ts';
+import { readEnv } from '../config/env.ts';
 
 const DEFAULT_DB_FILE = 'database.sqlite';
 const LEGACY_DB_FILE = 'commits.sqlite';

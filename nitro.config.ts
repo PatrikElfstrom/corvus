@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { defineNitroConfig } from "nitro/config";
-import { resolveSqlitePath } from "./src/server/db/sqlite-path.ts";
+import { resolveSqlitePath } from "./src/db/sqlite-path.ts";
 
 const syncSchedule = process.env.SYNC_CRON ?? "0 0 * * *";
 const sqlitePath = resolveSqlitePath();
@@ -27,28 +27,28 @@ export default defineNitroConfig({
       },
     },
   },
-  plugins: [resolve("./src/server/plugins/init-integrations-config.ts")],
+  plugins: [resolve("./src/plugins/init-integrations-config.ts")],
   handlers: [
     {
       route: "/",
       method: "GET",
-      handler: resolve("./src/server/routes/index.ts"),
+      handler: resolve("./src/routes/index.ts"),
     },
     {
       route: "/year.svg",
       method: "GET",
-      handler: resolve("./src/server/routes/year-svg.ts"),
+      handler: resolve("./src/routes/year-svg.ts"),
     },
     {
       route: "/_internal/tasks/:name",
       method: "POST",
-      handler: resolve("./src/server/routes/internal-task.ts"),
+      handler: resolve("./src/routes/internal-task.ts"),
     },
   ],
   tasks: {
     "sync:integrations": {
       description: "Sync commits for all configured integrations.",
-      handler: resolve("./src/server/tasks/sync-integrations.ts"),
+      handler: resolve("./src/tasks/sync-integrations.ts"),
     },
   },
   scheduledTasks: {

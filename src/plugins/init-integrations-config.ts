@@ -1,7 +1,7 @@
 import { definePlugin } from 'nitro';
-import { initConfig } from '../config.ts';
+import { initConfig } from '../config/config.ts';
+import { initIntegrationsConfig } from '../config/integrations-config.ts';
 import { initDatabaseSchema } from '../db/index.ts';
-import { initIntegrationsConfig } from '../integrations-config.ts';
 import { logger } from '../logger.ts';
 
 export default definePlugin(async () => {

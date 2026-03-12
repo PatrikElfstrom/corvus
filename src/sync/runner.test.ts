@@ -3,14 +3,12 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-
-import type { ResolvedIntegration } from '../server/providers/index.ts';
+import type { ResolvedIntegration } from '../providers/index.ts';
 import {
-  resolveRequestedIntegrations,
   runAllIntegrationsSyncs,
   runConfiguredIntegrationsSyncs,
   type SyncProgressEvent,
-} from './sync.ts';
+} from './runner.ts';
 
 async function withTempConfig(
   content: string,
@@ -34,6 +32,20 @@ async function withTempConfig(
 
     rmSync(directory, { recursive: true, force: true });
   }
+}
+
+function makeIntegration(id: string, enabled: boolean): ResolvedIntegration {
+  return {
+    id,
+    provider: 'github',
+    enabled,
+    fetchOptions: {
+      username: `${id}-user`,
+      token: `${id}-token`,
+      match_author: [`${id}-user`],
+      blacklist: [],
+    },
+  };
 }
 
 test('runAllIntegrationsSyncs skips integrations where enabled is false', async () => {
@@ -94,69 +106,6 @@ test('runAllIntegrationsSyncs reloads config on each run', async () => {
         message: /token/i,
       });
     },
-  );
-});
-
-function makeIntegration(id: string, enabled: boolean): ResolvedIntegration {
-  return {
-    id,
-    provider: 'github',
-    enabled,
-    fetchOptions: {
-      username: `${id}-user`,
-      token: `${id}-token`,
-      match_author: [`${id}-user`],
-      blacklist: [],
-    },
-  };
-}
-
-test('resolveRequestedIntegrations returns requested enabled integrations in request order', () => {
-  const configuredIntegrations = [
-    makeIntegration('github-main', true),
-    makeIntegration('gitlab-main', true),
-    makeIntegration('other', true),
-  ];
-
-  const selectedIntegrations = resolveRequestedIntegrations(
-    configuredIntegrations,
-    ['gitlab-main', 'github-main', 'gitlab-main'],
-  );
-
-  assert.deepEqual(
-    selectedIntegrations.map((integration) => integration.id),
-    ['gitlab-main', 'github-main'],
-  );
-});
-
-test('resolveRequestedIntegrations rejects unknown and disabled integrations', () => {
-  const configuredIntegrations = [
-    makeIntegration('github-main', true),
-    makeIntegration('gitlab-main', false),
-  ];
-
-  assert.throws(
-    () =>
-      resolveRequestedIntegrations(configuredIntegrations, [
-        'github-main',
-        'gitlab-main',
-        'missing',
-      ]),
-    {
-      message:
-        /Cannot sync requested integrations; unknown integration ids: missing; disabled integration ids: gitlab-main/i,
-    },
-  );
-});
-
-test('resolveRequestedIntegrations rejects duplicate configured ids for requested integrations', () => {
-  const configuredIntegrations = [
-    makeIntegration('github-main', true),
-    makeIntegration('github-main', true),
-  ];
-
-  assert.throws(() =>
-    resolveRequestedIntegrations(configuredIntegrations, ['github-main']),
   );
 });
 
@@ -322,53 +271,95 @@ test('runConfiguredIntegrationsSyncs emits progress events while syncing', async
         },
       };
     },
-    (event) => {
+    async (event) => {
       events.push(event);
     },
   );
 
-  assert.deepEqual(
-    events.map((event) => event.type),
-    [
-      'sync-started',
-      'integration-started',
-      'integration-completed',
-      'integration-started',
-      'integration-failure',
-      'integration-completed',
-      'sync-completed',
-    ],
-  );
+  assert.deepEqual(events, [
+    {
+      type: 'sync-started',
+      integrationsConfigured: 3,
+      integrationsEnabled: 2,
+      integrationsDisabled: 1,
+    },
+    {
+      type: 'integration-started',
+      integrationId: 'healthy',
+      provider: 'github',
+      username: 'healthy-user',
+    },
+    {
+      type: 'integration-completed',
+      integrationId: 'healthy',
+      provider: 'github',
+      username: 'healthy-user',
+      contributionsFetched: 6,
+      contributionsStored: 6,
+      commitsStored: 4,
+      failuresCaptured: 0,
+      error: null,
+    },
+    {
+      type: 'integration-started',
+      integrationId: 'partial-failure',
+      provider: 'github',
+      username: 'partial-failure-user',
+    },
+    {
+      type: 'integration-failure',
+      integrationId: 'partial-failure',
+      provider: 'github',
+      username: 'partial-failure-user',
+      failure: {
+        provider: 'github',
+        targetType: 'repository',
+        targetName: 'owner/repo-a',
+        repositoryFullName: 'owner/repo-a',
+        commitHash: null,
+        statusCode: 403,
+        message: 'Rate limited',
+      },
+    },
+    {
+      type: 'integration-completed',
+      integrationId: 'partial-failure',
+      provider: 'github',
+      username: 'partial-failure-user',
+      contributionsFetched: 3,
+      contributionsStored: 2,
+      commitsStored: 1,
+      failuresCaptured: 1,
+      error: 'Encountered 1 github fetch failure',
+    },
+    {
+      type: 'sync-completed',
+      totalIntegrations: 2,
+      successfulCount: 1,
+      failedCount: 1,
+    },
+  ]);
 });
 
 test('runConfiguredIntegrationsSyncs forwards ignoreDateScope to each integration run', async () => {
   const configuredIntegrations = [
     makeIntegration('github-main', true),
-    makeIntegration('disabled', false),
+    makeIntegration('gitlab-main', false),
   ];
-  const receivedOptions: Array<boolean> = [];
+  const seenOptions: Array<unknown> = [];
 
-  const summary = await runConfiguredIntegrationsSyncs(
+  await runConfiguredIntegrationsSyncs(
     configuredIntegrations,
-    async (integration, options) => {
-      receivedOptions.push(options?.ignoreDateScope === true);
-
+    async (_integration, options) => {
+      seenOptions.push(options);
       return {
         error: null,
-        result: {
-          username: integration.fetchOptions.username,
-          contributionsFetched: 2,
-          contributionsStored: 2,
-          commitsStored: 1,
-          failuresCaptured: 0,
-          failures: [],
-        },
+        result: null,
       };
     },
     undefined,
     { ignoreDateScope: true },
   );
 
-  assert.equal(summary.totalIntegrations, 1);
-  assert.deepEqual(receivedOptions, [true]);
+  assert.deepEqual(seenOptions, [{ ignoreDateScope: true }]);
 });

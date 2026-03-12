@@ -1,6 +1,6 @@
 import type { TaskPayload } from 'nitro/types';
 import { z } from 'zod';
-import type { SyncExecutionOptions } from '../../utils/sync.ts';
+import type { SyncExecutionOptions } from '../sync/index.ts';
 
 const syncIntegrationsTaskPayloadSchema = z
   .object({

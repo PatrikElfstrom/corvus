@@ -1,11 +1,11 @@
+import { loadIntegrationsFromConfig } from '../config/integrations-config.ts';
+import { logger } from '../logger.ts';
 import {
   resolveRequestedIntegrations,
   runAllIntegrationsSyncs,
   runConfiguredIntegrationsSyncs,
   type SyncAllIntegrationsResult,
-} from '../../utils/sync.ts';
-import { loadIntegrationsFromConfig } from '../integrations-config.ts';
-import { logger } from '../logger.ts';
+} from '../sync/index.ts';
 import type { SyncIntegrationsTaskPayload } from './sync-integrations-payload.ts';
 
 export const MANUAL_SYNC_BUSY_MESSAGE = 'Sync is currently active.';

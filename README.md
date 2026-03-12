@@ -192,7 +192,7 @@ bun run dev
 
 ### Add a provider
 
-1. Create `src/server/providers/<provider>/manifest.ts` with provider options schema and normalization.
+1. Create `src/providers/<provider>/manifest.ts` with provider options schema and normalization.
 2. Implement provider adapter/types/client/fetch logic in the same provider directory.
-3. Export the manifest in `src/server/providers/index.ts`.
+3. Export the manifest in `src/providers/index.ts`.
 4. Add manifest and flow tests.

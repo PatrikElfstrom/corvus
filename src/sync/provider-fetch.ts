@@ -1,18 +1,18 @@
 import {
   commitMatchesIdentity,
   normalizeIdentityMatchers,
-} from './identity.ts';
-import { logger } from './logger.ts';
-import { loadProviderAdapter, type Provider } from './providers/config.ts';
-import type { ProviderFetchOptions } from './providers/kernel/manifest-types.ts';
+} from '../identity.ts';
+import { logger } from '../logger.ts';
+import { loadProviderAdapter, type Provider } from '../providers/config.ts';
+import type { ProviderFetchOptions } from '../providers/kernel/manifest-types.ts';
 import type {
   NormalisedCommit,
   NormalisedContribution,
   ProviderFailure,
   SyncStream,
-} from './providers/types.ts';
+} from '../providers/types.ts';
 
-export type { Provider } from './providers/config.ts';
+export type { Provider } from '../providers/config.ts';
 export type {
   ContributionCategory,
   ContributionType,
@@ -20,7 +20,7 @@ export type {
   NormalisedContribution,
   SyncFailureTargetType,
   SyncStream,
-} from './providers/types.ts';
+} from '../providers/types.ts';
 
 export interface SyncFetchFailure extends ProviderFailure {
   provider: Provider;

@@ -1,7 +1,7 @@
 import { defineCachedHandler } from 'nitro/cache';
 import { getQuery, getRequestURL } from 'nitro/h3';
-import { getConfigCacheVersion } from '../config.ts';
-import { renderRollingYearsSvg } from '../year-svg.ts';
+import { renderRollingYearsSvg } from '../calendar/index.ts';
+import { getConfigCacheVersion } from '../config/config.ts';
 
 export const ONE_HOUR_SECONDS = 60 * 60;
 

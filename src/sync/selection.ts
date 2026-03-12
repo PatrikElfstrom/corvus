@@ -1,4 +1,4 @@
-import type { ResolvedIntegration } from '../server/providers/index.ts';
+import type { ResolvedIntegration } from '../providers/index.ts';
 
 function normalizeRequestedIntegrationIds(
   integrationIds: Array<string>,

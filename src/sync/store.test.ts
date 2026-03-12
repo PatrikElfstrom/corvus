@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import type { NormalisedContribution } from '../server/providers.ts';
-import { persistContributionsWithDatabase } from './sync-store.ts';
+import type { NormalisedContribution } from './provider-fetch.ts';
+import { persistContributionsWithDatabase } from './store.ts';
 
 interface FakeDatabaseOptions {
   failOnInsert?: number;

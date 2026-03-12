@@ -1,12 +1,12 @@
 {
   "include": [
     "nitro.config.ts",
-    "src/server/**/*.ts",
+    "src/**/*.ts",
     "src/utils/**/*.ts",
     "scripts/**/*.ts"
   ],
   "exclude": [
-    "src/server/**/*.test.ts",
+    "src/**/*.test.ts",
     "src/utils/**/*.test.ts"
   ],
   "compilerOptions": {

@@ -1,21 +1,21 @@
-import { loadIntegrationsFromConfig } from '../server/integrations-config.ts';
-import { logger } from '../server/logger.ts';
-import type { ResolvedIntegration } from '../server/providers/index.ts';
-import type {
-  Provider,
-  SyncFetchFailure,
-  SyncStream,
-} from '../server/providers.ts';
-import { fetchContributionStreamForProvider } from '../server/providers.ts';
-import { parseSyncFailureError } from '../server/sync-failure.ts';
-import { resolveRequestedIntegrations } from './sync-selection.ts';
+import { loadIntegrationsFromConfig } from '../config/integrations-config.ts';
+import { logger } from '../logger.ts';
+import type { ResolvedIntegration } from '../providers/index.ts';
+import { parseSyncFailureError } from '../sync-failure.ts';
+import {
+  fetchContributionStreamForProvider,
+  type Provider,
+  type SyncFetchFailure,
+  type SyncStream,
+} from './provider-fetch.ts';
+import { resolveRequestedIntegrations } from './selection.ts';
 import {
   ensureSyncDatabaseSchema,
   fetchIntegrationLastSuccessfulSyncStartedAt,
   persistContributions,
   persistIntegrationSyncCheckpoint,
   persistIntegrationSyncRun,
-} from './sync-store.ts';
+} from './store.ts';
 
 const SYNC_STREAMS = [
   'commits',
@@ -116,8 +116,6 @@ type IntegrationSyncExecutor = (
   integration: ResolvedIntegration,
   options?: SyncExecutionOptions,
 ) => Promise<RunIntegrationSyncResult>;
-
-export { resolveRequestedIntegrations };
 
 async function reportSyncProgress(
   onProgress: SyncProgressReporter | undefined,
@@ -434,3 +432,5 @@ export async function runAllIntegrationsSyncs(
     options,
   );
 }
+
+export { resolveRequestedIntegrations };

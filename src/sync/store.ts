@@ -1,16 +1,18 @@
 import { createHash } from 'node:crypto';
-import { getDatabase, initDatabaseSchema } from '../server/db/index.ts';
-import { logger } from '../server/logger.ts';
+import { getDatabase, initDatabaseSchema } from '../db/index.ts';
+import { logger } from '../logger.ts';
 import type {
   NormalisedContribution,
   Provider,
   SyncStream,
-} from '../server/providers.ts';
+} from './provider-fetch.ts';
 
 const INSERT_BATCH_SIZE = 100;
+
 type SQLResult<T> = {
   rows?: T[] | undefined;
 };
+
 type SQLWriteResult = {
   changes?: number | undefined;
 };

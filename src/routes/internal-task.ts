@@ -8,9 +8,9 @@ import {
 import { runTask } from 'nitro/task';
 import type { TaskPayload } from 'nitro/types';
 import { z } from 'zod';
-import { resolveRequestedIntegrations } from '../../utils/sync.ts';
-import { readEnv } from '../env.ts';
-import { loadIntegrationsFromConfig } from '../integrations-config.ts';
+import { readEnv } from '../config/env.ts';
+import { loadIntegrationsFromConfig } from '../config/integrations-config.ts';
+import { resolveRequestedIntegrations } from '../sync/index.ts';
 import { parseSyncIntegrationsTaskPayload } from '../tasks/sync-integrations-payload.ts';
 import type { SyncTriggerResult } from '../tasks/sync-trigger-coordinator.ts';
 import { createSyncTaskResponse as buildSyncTaskResponse } from './internal-task-sync-response.ts';
