@@ -163,9 +163,17 @@ test('renderCalendarSvg returns SVG with month labels, weekday labels, and toolt
     ]),
   );
 
-  const svg = renderCalendarSvg(activities, 'light', 'corvus', themes);
+  const svg = renderCalendarSvg(
+    activities,
+    'light',
+    'corvus',
+    themes,
+    '7 contributions in the last year',
+  );
 
   assert.match(svg, /^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/);
+  assert.match(svg, /<title>7 contributions in the last year<\/title>/);
+  assert.match(svg, /<text[^>]*>7 contributions in the last year<\/text>/);
   assert.match(svg, /<title>1 contribution on January 27, 2026\.<\/title>/);
   assert.match(svg, />Jan<\/text>/);
   assert.match(svg, />Feb<\/text>/);

@@ -57,7 +57,7 @@ const CELL_BORDER = 'rgba(31, 35, 40, 0.05)';
 const CELL_BORDER_WIDTH = 0.5;
 const LEFT_MARGIN = 28;
 const RIGHT_MARGIN = 0;
-const TOP_MARGIN = 15;
+const TOP_MARGIN = 20;
 const BOTTOM_MARGIN = 8;
 const LABEL_GAP = 5;
 const LEGEND_HEIGHT = 28;
@@ -65,6 +65,10 @@ const LEGEND_LABEL_GAP = 4;
 const LEGEND_RIGHT_PADDING = 16;
 const LEGEND_LABEL_WIDTH = 28;
 const FONT_SIZE = 12;
+const SUMMARY_TITLE_X = 0;
+const SUMMARY_TITLE_Y = 0;
+const SUMMARY_TITLE_FONT_SIZE = 16;
+const SUMMARY_TITLE_HEIGHT = 20;
 const LEGEND_LABELS = {
   less: 'Less',
   more: 'More',
@@ -87,6 +91,14 @@ const TITLE_LABEL_SWATCH = (index: number) => {
     return `${index}+ contributions`;
   }
   return `${index} contributions`;
+};
+
+const TITLE_LABEL_SUMMARY = (count: number, periodLabel: string) => {
+  if (count === 1) {
+    return `${count} contribution ${periodLabel}`;
+  }
+
+  return `${count} contributions ${periodLabel}`;
 };
 const FONT_STACK =
   '-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif';
@@ -356,6 +368,7 @@ function appendMonthLabels(
   document: Document,
   activities: Array<PlotActivity>,
   textColor: string,
+  topOffset: number,
 ): void {
   const xScale = svg.scale('x');
 
@@ -379,8 +392,7 @@ function appendMonthLabels(
       labelsGroup,
       {
         x: String(xScale.apply(activity.weekIndex) + CELL_INSET),
-        y: String(TOP_MARGIN + CELL_INSET - LABEL_GAP),
-        // 'dominant-baseline': 'text-after-edge',
+        y: String(topOffset + TOP_MARGIN + CELL_INSET - LABEL_GAP),
         'text-anchor': 'start',
       },
       monthFormatter.format(monthDate),
@@ -401,11 +413,44 @@ function getCellTitle(activity: PlotActivity): string {
   return TITLE_LABEL_CONTRIBUTIONS(activity.count, date);
 }
 
+function appendSvgTitle(
+  svg: SVGElement,
+  document: Document,
+  title: string,
+): void {
+  const svgTitle = document.createElementNS(SVG_NAMESPACE, 'title');
+
+  svgTitle.textContent = title;
+  svg.append(svgTitle);
+}
+
+function appendVisibleSvgTitle(
+  svg: SVGElement,
+  document: Document,
+  title: string,
+  textColor: string,
+): void {
+  appendSvgText(
+    document,
+    svg,
+    {
+      x: String(SUMMARY_TITLE_X),
+      y: String(SUMMARY_TITLE_Y),
+      fill: textColor,
+      'font-size': String(SUMMARY_TITLE_FONT_SIZE),
+      'text-anchor': 'start',
+      'dominant-baseline': 'text-top',
+    },
+    title,
+  );
+}
+
 export function renderCalendarSvg(
   activities: Array<PlotActivity>,
   colorScheme: CalendarColorScheme | undefined,
   theme: CalendarTheme,
   availableThemes: ThemeMap,
+  svgTitle?: string,
 ): string {
   const resolvedTheme =
     availableThemes[theme] ?? availableThemes[DEFAULT_THEME_NAME];
@@ -419,15 +464,19 @@ export function renderCalendarSvg(
   const weekCount =
     Math.max(...activities.map((activity) => activity.weekIndex)) + 1;
   const textColor = 'var(--calendar-text-color)';
+  const contentOffsetY = svgTitle ? SUMMARY_TITLE_Y + SUMMARY_TITLE_HEIGHT : 0;
   const svgWidth = LEFT_MARGIN + RIGHT_MARGIN + weekCount * CELL_STEP;
   const plotHeight =
-    TOP_MARGIN + BOTTOM_MARGIN + WEEKDAY_LABELS.length * CELL_STEP;
+    contentOffsetY +
+    TOP_MARGIN +
+    BOTTOM_MARGIN +
+    WEEKDAY_LABELS.length * CELL_STEP;
   const svgHeight = plotHeight + LEGEND_HEIGHT;
   const svg = Plot.plot({
     document,
     width: svgWidth,
     height: plotHeight,
-    marginTop: TOP_MARGIN,
+    marginTop: contentOffsetY + TOP_MARGIN,
     marginRight: RIGHT_MARGIN,
     marginBottom: BOTTOM_MARGIN,
     marginLeft: LEFT_MARGIN,
@@ -484,7 +533,13 @@ export function renderCalendarSvg(
   svg.style.setProperty('font-size', `${FONT_SIZE}px`);
 
   appendThemeStyles(svg, document, resolvedTheme, colorScheme);
-  appendMonthLabels(svg, document, activities, textColor);
+
+  if (svgTitle) {
+    appendSvgTitle(svg, document, svgTitle);
+    appendVisibleSvgTitle(svg, document, svgTitle, textColor);
+  }
+
+  appendMonthLabels(svg, document, activities, textColor, contentOffsetY);
   appendWeekdayLabels(svg, document, textColor);
 
   const legendGroup = document.createElementNS(SVG_NAMESPACE, 'g');
@@ -550,6 +605,7 @@ async function renderDateRangeSvg(
   colorScheme: CalendarColorScheme | undefined,
   theme: CalendarTheme,
   availableThemes: ThemeMap,
+  summaryPeriodLabel?: string,
 ): Promise<string> {
   const normalizedStartDate = toUtcDateOnly(startDate);
   const normalizedEndDate = toUtcDateOnly(endDate);
@@ -578,11 +634,20 @@ async function renderDateRangeSvg(
     return EMPTY_SVG;
   }
 
+  const activities = buildPlotActivities(start, end, countsByDate);
+  const svgTitle = summaryPeriodLabel
+    ? TITLE_LABEL_SUMMARY(
+        activities.reduce((total, activity) => total + activity.count, 0),
+        summaryPeriodLabel,
+      )
+    : undefined;
+
   return renderCalendarSvg(
-    buildPlotActivities(start, end, countsByDate),
+    activities,
     colorScheme,
     theme,
     availableThemes,
+    svgTitle,
   );
 }
 
@@ -620,5 +685,6 @@ export async function renderRollingYearsSvg(
     resolvedColorScheme,
     resolvedTheme,
     availableThemes,
+    years === 1 ? 'in the last year' : undefined,
   );
 }
