@@ -16,7 +16,7 @@ test('getActivityLevel preserves the existing contribution buckets', () => {
   assert.equal(getActivityLevel(7), 4);
 });
 
-test('buildPlotActivities emits week and weekday coordinates for a Monday-first grid', () => {
+test('buildPlotActivities emits week and weekday coordinates for a Monday-first grid when requested', () => {
   const activities = buildPlotActivities(
     new Date('2026-01-26T00:00:00Z'),
     new Date('2026-02-03T00:00:00Z'),
@@ -25,6 +25,7 @@ test('buildPlotActivities emits week and weekday coordinates for a Monday-first 
       ['2026-02-01', 4],
       ['2026-02-03', 2],
     ]),
+    'monday',
   );
 
   assert.deepEqual(
@@ -118,6 +119,83 @@ test('buildPlotActivities emits week and weekday coordinates for a Monday-first 
         weekdayIndex: 1,
         weekdayLabel: 'Tue',
         monthTick: false,
+      },
+    ],
+  );
+});
+
+test('buildPlotActivities defaults to a Sunday-first grid', () => {
+  const activities = buildPlotActivities(
+    new Date('2026-01-26T00:00:00Z'),
+    new Date('2026-02-03T00:00:00Z'),
+    makeCountsByDate([
+      ['2026-01-27', 1],
+      ['2026-02-01', 4],
+      ['2026-02-03', 2],
+    ]),
+  );
+
+  assert.deepEqual(
+    activities.map((activity) => ({
+      date: activity.date,
+      weekIndex: activity.weekIndex,
+      weekdayIndex: activity.weekdayIndex,
+      weekdayLabel: activity.weekdayLabel,
+    })),
+    [
+      {
+        date: '2026-01-26',
+        weekIndex: 0,
+        weekdayIndex: 1,
+        weekdayLabel: 'Mon',
+      },
+      {
+        date: '2026-01-27',
+        weekIndex: 0,
+        weekdayIndex: 2,
+        weekdayLabel: 'Tue',
+      },
+      {
+        date: '2026-01-28',
+        weekIndex: 0,
+        weekdayIndex: 3,
+        weekdayLabel: 'Wed',
+      },
+      {
+        date: '2026-01-29',
+        weekIndex: 0,
+        weekdayIndex: 4,
+        weekdayLabel: 'Thu',
+      },
+      {
+        date: '2026-01-30',
+        weekIndex: 0,
+        weekdayIndex: 5,
+        weekdayLabel: 'Fri',
+      },
+      {
+        date: '2026-01-31',
+        weekIndex: 0,
+        weekdayIndex: 6,
+        weekdayLabel: 'Sat',
+      },
+      {
+        date: '2026-02-01',
+        weekIndex: 1,
+        weekdayIndex: 0,
+        weekdayLabel: 'Sun',
+      },
+      {
+        date: '2026-02-02',
+        weekIndex: 1,
+        weekdayIndex: 1,
+        weekdayLabel: 'Mon',
+      },
+      {
+        date: '2026-02-03',
+        weekIndex: 1,
+        weekdayIndex: 2,
+        weekdayLabel: 'Tue',
       },
     ],
   );

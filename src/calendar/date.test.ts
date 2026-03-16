@@ -7,8 +7,16 @@ import {
   toUtcDateOnly,
 } from './date.ts';
 
-test('getFixedWeekWindow returns a Monday-first 53-week window', () => {
+test('getFixedWeekWindow defaults to a Sunday-first 53-week window', () => {
   const { start, end } = getFixedWeekWindow(53);
+
+  assert.equal(start.getUTCDay(), 0);
+  assert.equal(end.getUTCDay(), 6);
+  assert.equal((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000), 370);
+});
+
+test('getFixedWeekWindow returns a Monday-first 53-week window when requested', () => {
+  const { start, end } = getFixedWeekWindow(53, 'monday');
 
   assert.equal(start.getUTCDay(), 1);
   assert.equal(end.getUTCDay(), 0);

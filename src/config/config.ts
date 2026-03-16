@@ -8,6 +8,7 @@ import {
 import path from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { z } from 'zod';
+import { weekStartSchema } from '../calendar/week-start.ts';
 import { logger } from '../logger.ts';
 import { readEnv } from './env.ts';
 import {
@@ -29,6 +30,7 @@ const DEFAULT_CONFIG_TEMPLATE = `# Application configuration
 # settings:
 #   theme: fuchsia
 #   title: false
+#   week_start: sunday
 # 
 # themes:
 #   fuchsia:
@@ -52,8 +54,9 @@ const settingsSchema = z
   .object({
     theme: z.string().min(1).optional(),
     title: z.boolean().default(true),
+    week_start: weekStartSchema,
   })
-  .default({ title: true });
+  .default({ title: true, week_start: 'sunday' });
 
 const appConfigSchema = z
   .object({
@@ -67,6 +70,7 @@ export type AppConfig = {
   settings: {
     theme?: string;
     title: boolean;
+    weekStart: z.infer<typeof weekStartSchema>;
   };
   themes: ThemeMap;
 };
@@ -229,7 +233,8 @@ export function loadConfig(): AppConfig {
   const availableThemes = mergeThemes(customThemes);
   const config: AppConfig = {
     settings: {
-      ...parsedConfig.data.settings,
+      title: parsedConfig.data.settings.title,
+      weekStart: parsedConfig.data.settings.week_start,
       theme: normalizeConfiguredDefaultTheme(
         parsedConfig.data.settings.theme ?? parsedConfig.data.theme,
         availableThemes,

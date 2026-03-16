@@ -1,25 +1,41 @@
 import { defineCachedHandler } from 'nitro/cache';
 import { getQuery, getRequestURL } from 'nitro/h3';
 import { renderRollingYearsSvg } from '../calendar/index.ts';
-import { parseOptionalBooleanQuery } from '../calendar/theme-query.ts';
+import {
+  parseOptionalBooleanQuery,
+  parseOptionalDarkModeQuery,
+  parseOptionalWeekStart,
+} from '../calendar/theme-query.ts';
 import { getConfigCacheVersion } from '../config/config.ts';
 
 export const ONE_HOUR_SECONDS = 60 * 60;
 
 export default defineCachedHandler(
   async (event) => {
-    const { colorScheme, theme, title } = getQuery(event);
+    const {
+      dark_mode: darkMode,
+      theme,
+      title,
+      week_start: weekStart,
+    } = getQuery(event);
     const colorSchemeValue =
-      typeof colorScheme === 'string' ? colorScheme : undefined;
+      typeof darkMode === 'string'
+        ? parseOptionalDarkModeQuery(darkMode)
+        : undefined;
     const themeValue = typeof theme === 'string' ? theme : undefined;
     const titleValue =
       typeof title === 'string' ? parseOptionalBooleanQuery(title) : undefined;
+    const weekStartValue =
+      typeof weekStart === 'string'
+        ? parseOptionalWeekStart(weekStart)
+        : undefined;
 
     const svg = await renderRollingYearsSvg(
       1,
       colorSchemeValue,
       themeValue,
       titleValue,
+      weekStartValue,
     );
 
     return new Response(svg, {

@@ -71,7 +71,7 @@ Additional options and filters are available:
 | `filters.author_include`     | array   | Conditional | Include commits from specific authors (required for `filepath`)                       |
 | `filters.repository_exclude` | array   | No          | Exclude repositories by name                                                          |
 
-### Example config with multiple integrations:
+#### Example config with multiple integrations:
 
 ```yaml
 integrations:
@@ -123,14 +123,24 @@ integrations:
 | Gitea     | `read:repository`, `read:user`                                                                               |
 | Forgejo   | `read:repository`, `read:user`                                                                               |
 
-### Themes
-
-Corvus comes with two built-in themes, `corvus` and `github`, which can be selected by setting the default `settings.theme` property in `data/config.yaml` or with the `theme` query parameter, for example `/year.svg?theme=github`.
+### Settings
 
 ```yaml
 settings:
-  theme: github
+  title: true
+  week_start: sunday
+  theme: corvus
+  dark_mode: auto
 ```
+
+| Setting      | Possible values                                                              | Default  | Description                                         |
+| ------------ | ---------------------------------------------------------------------------- | -------- | --------------------------------------------------- |
+| `title`      | `true`, `false`                                                              | `true`   | Show summary title above the calendar               |
+| `week_start` | `sunday`, `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday` | `sunday` | Day to start the week on                            |
+| `theme`      | `corvus`, `github`, or custom theme name                                     | `corvus` | Set a theme or a custom theme                       |
+| `dark_mode`  | `auto`, `light`, `dark`                                                      | `auto`   | Follow system color scheme or force light/dark mode |
+
+The `title`, `theme`, and `week_start` settings can also be overridden per request with query parameters, for example `/year.svg?week_start=monday&theme=github&title=false&dark_mode=dark`.
 
 #### Custom themes
 
@@ -159,16 +169,7 @@ Custom themes are available in addition to the built-in themes and can still be 
 
 Corvus supports dark mode and the calendar will automatically switch between light and dark themes using CSS `prefers-color-scheme` inside the generated SVG. This allows embedded SVGs to follow the surrounding page's color scheme.
 
-### Display settings
-
-You can disable the visible summary title in `data/config.yaml`:
-
-```yaml
-settings:
-  title: false
-```
-
-You can also override that per request with the `title` query parameter, for example `/year.svg?title=false`.
+You can control dark mode with the `dark_mode` query parameter. Use `auto` to follow `prefers-color-scheme`, `true` to force dark mode, or `false` to force light mode. For example: `/year.svg?dark_mode=true`.
 
 ## Environment defaults
 

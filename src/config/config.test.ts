@@ -108,6 +108,7 @@ test('loadConfig defaults the title setting to enabled', async () => {
     const config = loadConfig();
 
     assert.equal(config.settings.title, true);
+    assert.equal(config.settings.weekStart, 'sunday');
     assert.equal(config.settings.theme, undefined);
   });
 });
@@ -121,6 +122,19 @@ test('loadConfig preserves a configured title setting', async () => {
       const config = loadConfig();
 
       assert.equal(config.settings.title, false);
+    },
+  );
+});
+
+test('loadConfig preserves a configured week start setting', async () => {
+  await withTempConfig(
+    `settings:
+  week_start: sunday
+`,
+    () => {
+      const config = loadConfig();
+
+      assert.equal(config.settings.weekStart, 'sunday');
     },
   );
 });

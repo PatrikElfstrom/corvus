@@ -2,7 +2,7 @@ import * as Plot from '@observablehq/plot';
 import { utcMonth } from 'd3';
 import { Window } from 'happy-dom';
 import { DEFAULT_THEME_NAME, type ThemeMap } from '../config/themes.ts';
-import { type PlotActivity, WEEKDAY_LABELS } from './activity.ts';
+import type { PlotActivity } from './activity.ts';
 import {
   appendThemeStyles,
   BOTTOM_MARGIN,
@@ -37,6 +37,7 @@ import {
   VISIBLE_WEEKDAY_INDICES,
   XLINK_NAMESPACE,
 } from './svg-style.ts';
+import { getWeekdayLabels } from './week-start.ts';
 
 type PlotBandScale = {
   apply: (value: number) => number;
@@ -73,6 +74,7 @@ function appendWeekdayLabels(
   svg: PlotSvgElement,
   document: Document,
   textColor: string,
+  weekdayLabels: Array<string>,
 ): void {
   const yScale = svg.scale('y');
 
@@ -84,8 +86,10 @@ function appendWeekdayLabels(
   labelsGroup.setAttribute('aria-label', 'weekday labels');
   labelsGroup.setAttribute('fill', textColor);
 
-  for (const weekdayIndex of VISIBLE_WEEKDAY_INDICES) {
-    const weekdayLabel = WEEKDAY_LABELS[weekdayIndex];
+  for (const [weekdayIndex, weekdayLabel] of weekdayLabels.entries()) {
+    if (!VISIBLE_WEEKDAY_INDICES.has(weekdayIndex)) {
+      continue;
+    }
 
     if (!weekdayLabel) {
       continue;
@@ -196,6 +200,7 @@ export function renderCalendarSvg(
   availableThemes: ThemeMap,
   svgTitle?: string,
   showVisibleTitle = true,
+  weekdayLabels: Array<string> = getWeekdayLabels(),
 ): string {
   const resolvedTheme =
     availableThemes[theme] ?? availableThemes[DEFAULT_THEME_NAME];
@@ -216,7 +221,7 @@ export function renderCalendarSvg(
     contentOffsetY +
     TOP_MARGIN +
     BOTTOM_MARGIN +
-    WEEKDAY_LABELS.length * CELL_STEP;
+    weekdayLabels.length * CELL_STEP;
   const svgHeight = plotHeight + LEGEND_HEIGHT;
   const svg = Plot.plot({
     document,
@@ -240,7 +245,7 @@ export function renderCalendarSvg(
     },
     y: {
       axis: null,
-      domain: Array.from(WEEKDAY_LABELS, (_, index) => index),
+      domain: Array.from(weekdayLabels, (_, index) => index),
       padding: 0,
       round: true,
     },
@@ -289,7 +294,7 @@ export function renderCalendarSvg(
   }
 
   appendMonthLabels(svg, document, activities, textColor, contentOffsetY);
-  appendWeekdayLabels(svg, document, textColor);
+  appendWeekdayLabels(svg, document, textColor, weekdayLabels);
 
   const legendGroup = document.createElementNS(SVG_NAMESPACE, 'g');
   const legendSwatchWidth = 5 * 10 + 4 * 3;

@@ -8,6 +8,7 @@ import {
   themeSchema,
   themes,
 } from '../config/themes.ts';
+import { parseOptionalWeekStart } from './week-start.ts';
 
 function getThemeNameSchema(availableThemes: ThemeMap) {
   const themeNames = getThemeNames(availableThemes);
@@ -63,6 +64,16 @@ const booleanQuerySchema = z.enum(['true', 'false']).transform((value) => {
   return value === 'true';
 });
 
+const darkModeQuerySchema = z
+  .enum(['auto', 'true', 'false'])
+  .transform((value): ColorScheme | undefined => {
+    if (value === 'auto') {
+      return undefined;
+    }
+
+    return value === 'true' ? 'dark' : 'light';
+  });
+
 export function parseOptionalBooleanQuery(
   value: string | undefined,
 ): boolean | undefined {
@@ -74,3 +85,17 @@ export function parseOptionalBooleanQuery(
 
   return result.success ? result.data : undefined;
 }
+
+export function parseOptionalDarkModeQuery(
+  value: string | undefined,
+): ColorScheme | undefined {
+  if (value == null) {
+    return undefined;
+  }
+
+  const result = darkModeQuerySchema.safeParse(value.trim().toLowerCase());
+
+  return result.success ? result.data : undefined;
+}
+
+export { parseOptionalWeekStart };

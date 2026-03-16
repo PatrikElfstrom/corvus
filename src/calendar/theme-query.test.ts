@@ -4,6 +4,8 @@ import {
   parseColorScheme,
   parseOptionalBooleanQuery,
   parseOptionalColorScheme,
+  parseOptionalDarkModeQuery,
+  parseOptionalWeekStart,
   parseThemeName,
 } from './theme-query.ts';
 
@@ -32,11 +34,26 @@ test('parseOptionalColorScheme returns undefined for invalid values', () => {
   assert.equal(parseOptionalColorScheme('dark'), 'dark');
 });
 
+test('parseOptionalDarkModeQuery maps auto/true/false to render modes', () => {
+  assert.equal(parseOptionalDarkModeQuery('auto'), undefined);
+  assert.equal(parseOptionalDarkModeQuery('TRUE'), 'dark');
+  assert.equal(parseOptionalDarkModeQuery(' false '), 'light');
+  assert.equal(parseOptionalDarkModeQuery('maybe'), undefined);
+  assert.equal(parseOptionalDarkModeQuery(undefined), undefined);
+});
+
 test('parseOptionalBooleanQuery parses true and false query values', () => {
   assert.equal(parseOptionalBooleanQuery('true'), true);
   assert.equal(parseOptionalBooleanQuery('FALSE'), false);
   assert.equal(parseOptionalBooleanQuery(' maybe '), undefined);
   assert.equal(parseOptionalBooleanQuery(undefined), undefined);
+});
+
+test('parseOptionalWeekStart parses valid weekday names', () => {
+  assert.equal(parseOptionalWeekStart('sunday'), 'sunday');
+  assert.equal(parseOptionalWeekStart(' Monday '), 'monday');
+  assert.equal(parseOptionalWeekStart('weekend'), undefined);
+  assert.equal(parseOptionalWeekStart(undefined), undefined);
 });
 
 test('parseThemeName defaults to corvus when theme query is missing', () => {

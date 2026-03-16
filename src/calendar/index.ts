@@ -16,6 +16,7 @@ import {
   EMPTY_SVG,
 } from './svg-style.ts';
 import { parseOptionalColorScheme, parseThemeName } from './theme-query.ts';
+import { getWeekdayLabels, type WeekStart } from './week-start.ts';
 
 async function renderDateRangeSvg(
   startDate: Date,
@@ -24,6 +25,7 @@ async function renderDateRangeSvg(
   theme: CalendarTheme,
   availableThemes: ThemeMap,
   showTitle: boolean,
+  weekStart: WeekStart,
   summaryPeriodLabel?: string,
 ): Promise<string> {
   const normalizedStartDate = toUtcDateOnly(startDate);
@@ -53,7 +55,8 @@ async function renderDateRangeSvg(
     return EMPTY_SVG;
   }
 
-  const activities = buildPlotActivities(start, end, countsByDate);
+  const activities = buildPlotActivities(start, end, countsByDate, weekStart);
+  const weekdayLabels = getWeekdayLabels(weekStart);
   const svgTitle = summaryPeriodLabel
     ? createSummaryTitle(
         activities.reduce((total, activity) => total + activity.count, 0),
@@ -68,6 +71,7 @@ async function renderDateRangeSvg(
     availableThemes,
     svgTitle,
     showTitle,
+    weekdayLabels,
   );
 }
 
@@ -76,6 +80,7 @@ export async function renderRollingYearsSvg(
   colorScheme: string | undefined,
   theme?: CalendarTheme,
   showTitle?: boolean,
+  weekStart?: WeekStart,
 ): Promise<string> {
   if (!Number.isInteger(years) || years < 1) {
     return EMPTY_SVG;
@@ -87,12 +92,13 @@ export async function renderRollingYearsSvg(
   const resolvedColorScheme = parseOptionalColorScheme(colorScheme);
   const resolvedTheme = parseThemeName(theme, availableThemes, defaultTheme);
   const resolvedShowTitle = showTitle ?? config.settings.title;
+  const resolvedWeekStart = weekStart ?? config.settings.weekStart;
 
   let start: Date;
   let end: Date;
 
   if (years === 1) {
-    const fixedYearWindow = getFixedWeekWindow(53);
+    const fixedYearWindow = getFixedWeekWindow(53, resolvedWeekStart);
     start = fixedYearWindow.start;
     end = fixedYearWindow.end;
   } else {
@@ -108,6 +114,7 @@ export async function renderRollingYearsSvg(
     resolvedTheme,
     availableThemes,
     resolvedShowTitle,
+    resolvedWeekStart,
     years === 1 ? 'in the last year' : undefined,
   );
 }

@@ -1,3 +1,5 @@
+import { getWeekdayIndex, type WeekStart } from './week-start.ts';
+
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 export function addUtcDays(value: Date, days: number): Date {
@@ -14,10 +16,6 @@ export function toUtcDateOnly(value: Date): Date {
   return new Date(
     Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()),
   );
-}
-
-export function getMondayFirstWeekdayIndex(value: Date): number {
-  return (value.getUTCDay() + 6) % 7;
 }
 
 export function getUtcDayDifference(startDate: Date, endDate: Date): number {
@@ -39,7 +37,10 @@ export function subtractUtcYears(value: Date, years: number): Date {
   return new Date(Date.UTC(targetYear, targetMonth, clampedDay));
 }
 
-export function getFixedWeekWindow(totalWeeks: number): {
+export function getFixedWeekWindow(
+  totalWeeks: number,
+  weekStart: WeekStart = 'sunday',
+): {
   start: Date;
   end: Date;
 } {
@@ -47,13 +48,13 @@ export function getFixedWeekWindow(totalWeeks: number): {
   const totalDays = weeks * 7;
 
   const todayUtc = toUtcDateOnly(new Date());
-  const daysSinceMonday = getMondayFirstWeekdayIndex(todayUtc);
+  const daysSinceWeekStart = getWeekdayIndex(todayUtc, weekStart);
 
-  const currentWeekMonday = new Date(todayUtc);
-  currentWeekMonday.setUTCDate(todayUtc.getUTCDate() - daysSinceMonday);
+  const currentWeekStart = new Date(todayUtc);
+  currentWeekStart.setUTCDate(todayUtc.getUTCDate() - daysSinceWeekStart);
 
-  const end = new Date(currentWeekMonday);
-  end.setUTCDate(currentWeekMonday.getUTCDate() + 6);
+  const end = new Date(currentWeekStart);
+  end.setUTCDate(currentWeekStart.getUTCDate() + 6);
 
   const start = new Date(end);
   start.setUTCDate(end.getUTCDate() - (totalDays - 1));

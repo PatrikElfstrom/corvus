@@ -1,10 +1,14 @@
 import {
   addUtcDays,
-  getMondayFirstWeekdayIndex,
   getUtcDayDifference,
   toIsoDate,
   toUtcDateOnly,
 } from './date.ts';
+import {
+  getWeekdayIndex,
+  getWeekdayLabels,
+  type WeekStart,
+} from './week-start.ts';
 
 export interface PlotActivity {
   date: string;
@@ -15,8 +19,6 @@ export interface PlotActivity {
   weekdayLabel: string;
   monthTick: boolean;
 }
-
-export const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export function getActivityLevel(count: number): number {
   if (count <= 0) {
@@ -38,6 +40,7 @@ export function buildPlotActivities(
   startDate: Date,
   endDate: Date,
   countsByDate: Map<string, number>,
+  weekStart: WeekStart = 'sunday',
 ): Array<PlotActivity> {
   const normalizedStartDate = toUtcDateOnly(startDate);
   const normalizedEndDate = toUtcDateOnly(endDate);
@@ -49,7 +52,8 @@ export function buildPlotActivities(
     normalizedStartDate <= normalizedEndDate
       ? normalizedEndDate
       : normalizedStartDate;
-  const calendarStart = addUtcDays(start, -getMondayFirstWeekdayIndex(start));
+  const weekdayLabels = getWeekdayLabels(weekStart);
+  const calendarStart = addUtcDays(start, -getWeekdayIndex(start, weekStart));
 
   const activities: Array<PlotActivity> = [];
 
@@ -61,7 +65,7 @@ export function buildPlotActivities(
     const date = toIsoDate(currentDate);
     const count = countsByDate.get(date) ?? 0;
     const previousActivity = activities[activities.length - 1];
-    const weekdayIndex = getMondayFirstWeekdayIndex(currentDate);
+    const weekdayIndex = getWeekdayIndex(currentDate, weekStart);
 
     activities.push({
       date,
@@ -71,7 +75,7 @@ export function buildPlotActivities(
         getUtcDayDifference(calendarStart, currentDate) / 7,
       ),
       weekdayIndex,
-      weekdayLabel: WEEKDAY_LABELS[weekdayIndex] ?? '',
+      weekdayLabel: weekdayLabels[weekdayIndex] ?? '',
       monthTick:
         previousActivity == null ||
         previousActivity.date.slice(0, 7) !== date.slice(0, 7),

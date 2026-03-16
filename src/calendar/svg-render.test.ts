@@ -39,11 +39,41 @@ test('renderCalendarSvg returns SVG with month labels, weekday labels, and toolt
   assert.match(svg, /<title>1 contribution on January 27, 2026\.<\/title>/);
   assert.match(svg, />Jan<\/text>/);
   assert.match(svg, />Feb<\/text>/);
+  assert.match(svg, />Mon<\/text>/);
+  assert.match(svg, />Wed<\/text>/);
+  assert.match(svg, />Fri<\/text>/);
+  assert.match(svg, />Less<\/text>/);
+  assert.match(svg, />More<\/text>/);
+  assert.doesNotMatch(svg, />Tue<\/text>/);
+  assert.doesNotMatch(svg, />Thu<\/text>/);
+  assert.doesNotMatch(svg, />Sat<\/text>/);
+});
+
+test('renderCalendarSvg rotates weekday labels when the week starts on Monday', () => {
+  const activities = buildPlotActivities(
+    new Date('2026-01-26T00:00:00Z'),
+    new Date('2026-02-03T00:00:00Z'),
+    makeCountsByDate([
+      ['2026-01-27', 1],
+      ['2026-02-01', 4],
+      ['2026-02-03', 2],
+    ]),
+    'monday',
+  );
+
+  const svg = renderCalendarSvg(
+    activities,
+    'light',
+    'corvus',
+    themes,
+    undefined,
+    true,
+    ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  );
+
   assert.match(svg, />Tue<\/text>/);
   assert.match(svg, />Thu<\/text>/);
   assert.match(svg, />Sat<\/text>/);
-  assert.match(svg, />Less<\/text>/);
-  assert.match(svg, />More<\/text>/);
   assert.doesNotMatch(svg, />Mon<\/text>/);
   assert.doesNotMatch(svg, />Wed<\/text>/);
   assert.doesNotMatch(svg, />Fri<\/text>/);
