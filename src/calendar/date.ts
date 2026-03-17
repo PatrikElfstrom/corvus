@@ -37,6 +37,46 @@ export function subtractUtcYears(value: Date, years: number): Date {
   return new Date(Date.UTC(targetYear, targetMonth, clampedDay));
 }
 
+export function clampUtcDateRangeToToday(
+  startDate: Date,
+  endDate: Date,
+  today: Date = new Date(),
+): {
+  start: Date;
+  end: Date;
+} | null {
+  const normalizedStartDate = toUtcDateOnly(startDate);
+  const normalizedEndDate = toUtcDateOnly(endDate);
+  const normalizedToday = toUtcDateOnly(today);
+
+  if (
+    Number.isNaN(normalizedStartDate.getTime()) ||
+    Number.isNaN(normalizedEndDate.getTime()) ||
+    Number.isNaN(normalizedToday.getTime())
+  ) {
+    return null;
+  }
+
+  const start =
+    normalizedStartDate <= normalizedEndDate
+      ? normalizedStartDate
+      : normalizedEndDate;
+  const end =
+    normalizedStartDate <= normalizedEndDate
+      ? normalizedEndDate
+      : normalizedStartDate;
+  const clampedEnd = end <= normalizedToday ? end : normalizedToday;
+
+  if (start > clampedEnd) {
+    return null;
+  }
+
+  return {
+    start,
+    end: clampedEnd,
+  };
+}
+
 export function getFixedWeekWindow(
   totalWeeks: number,
   weekStart: WeekStart = 'sunday',

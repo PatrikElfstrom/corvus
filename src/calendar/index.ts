@@ -2,10 +2,10 @@ import { loadConfig } from '../config/config.ts';
 import type { ThemeMap } from '../config/themes.ts';
 import { buildPlotActivities } from './activity.ts';
 import {
+  clampUtcDateRangeToToday,
   getFixedWeekWindow,
   subtractUtcYears,
   toIsoDate,
-  toUtcDateOnly,
 } from './date.ts';
 import { fetchCountsByDateRange } from './repository.ts';
 import { renderCalendarSvg } from './svg-render.ts';
@@ -28,24 +28,13 @@ async function renderDateRangeSvg(
   weekStart: WeekStart,
   summaryPeriodLabel?: string,
 ): Promise<string> {
-  const normalizedStartDate = toUtcDateOnly(startDate);
-  const normalizedEndDate = toUtcDateOnly(endDate);
+  const clampedRange = clampUtcDateRangeToToday(startDate, endDate);
 
-  if (
-    Number.isNaN(normalizedStartDate.getTime()) ||
-    Number.isNaN(normalizedEndDate.getTime())
-  ) {
+  if (!clampedRange) {
     return EMPTY_SVG;
   }
 
-  const start =
-    normalizedStartDate <= normalizedEndDate
-      ? normalizedStartDate
-      : normalizedEndDate;
-  const end =
-    normalizedStartDate <= normalizedEndDate
-      ? normalizedEndDate
-      : normalizedStartDate;
+  const { start, end } = clampedRange;
 
   const startIsoDate = toIsoDate(start);
   const endIsoDate = toIsoDate(end);
@@ -102,7 +91,7 @@ export async function renderRollingYearsSvg(
     start = fixedYearWindow.start;
     end = fixedYearWindow.end;
   } else {
-    const today = toUtcDateOnly(new Date());
+    const today = new Date();
     start = subtractUtcYears(today, years);
     end = today;
   }
