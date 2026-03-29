@@ -20,6 +20,8 @@ export interface PlotActivity {
   monthTick: boolean;
 }
 
+const MIN_VISIBLE_DAYS_FOR_LEADING_MONTH_LABEL = 14;
+
 export function getActivityLevel(count: number): number {
   if (count <= 0) {
     return 0;
@@ -34,6 +36,28 @@ export function getActivityLevel(count: number): number {
     return 3;
   }
   return 4;
+}
+
+function isSameUtcMonth(left: Date, right: Date): boolean {
+  return (
+    left.getUTCFullYear() === right.getUTCFullYear() &&
+    left.getUTCMonth() === right.getUTCMonth()
+  );
+}
+
+function getUtcMonthEnd(value: Date): Date {
+  return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth() + 1, 0));
+}
+
+function shouldShowLeadingMonthLabel(start: Date, end: Date): boolean {
+  if (start.getUTCDate() === 1 || isSameUtcMonth(start, end)) {
+    return true;
+  }
+
+  return (
+    getUtcDayDifference(start, getUtcMonthEnd(start)) + 1 >=
+    MIN_VISIBLE_DAYS_FOR_LEADING_MONTH_LABEL
+  );
 }
 
 export function buildPlotActivities(
@@ -54,6 +78,7 @@ export function buildPlotActivities(
       : normalizedStartDate;
   const weekdayLabels = getWeekdayLabels(weekStart);
   const calendarStart = addUtcDays(start, -getWeekdayIndex(start, weekStart));
+  const showLeadingMonthLabel = shouldShowLeadingMonthLabel(start, end);
 
   const activities: Array<PlotActivity> = [];
 
@@ -77,8 +102,9 @@ export function buildPlotActivities(
       weekdayIndex,
       weekdayLabel: weekdayLabels[weekdayIndex] ?? '',
       monthTick:
-        previousActivity == null ||
-        previousActivity.date.slice(0, 7) !== date.slice(0, 7),
+        previousActivity == null
+          ? showLeadingMonthLabel
+          : previousActivity.date.slice(0, 7) !== date.slice(0, 7),
     });
   }
 

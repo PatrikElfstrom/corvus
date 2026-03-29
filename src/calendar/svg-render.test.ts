@@ -27,7 +27,7 @@ test('renderCalendarSvg returns the empty SVG for empty activity data', () => {
 
 test('renderCalendarSvg returns SVG with month labels, weekday labels, and tooltips', () => {
   const activities = buildPlotActivities(
-    new Date('2026-01-26T00:00:00Z'),
+    new Date('2026-01-18T00:00:00Z'),
     new Date('2026-02-03T00:00:00Z'),
     makeCountsByDate([
       ['2026-01-27', 1],
@@ -248,7 +248,7 @@ test('renderCalendarSvg uses translated labels and tooltip templates', () => {
 
 test('renderCalendarSvg falls back to en when translation locale is invalid', () => {
   const activities = buildPlotActivities(
-    new Date('2026-01-26T00:00:00Z'),
+    new Date('2026-01-18T00:00:00Z'),
     new Date('2026-02-03T00:00:00Z'),
     makeCountsByDate([
       ['2026-01-27', 1],
@@ -271,4 +271,24 @@ test('renderCalendarSvg falls back to en when translation locale is invalid', ()
   assert.match(svg, />Jan<\/text>/);
   assert.match(svg, />Feb<\/text>/);
   assert.match(svg, /<title>1 contribution on January 27, 2026\.<\/title>/);
+});
+
+test('renderCalendarSvg omits the leading month label when fewer than two weeks remain', () => {
+  const activities = buildPlotActivities(
+    new Date('2026-03-29T00:00:00Z'),
+    new Date('2026-04-10T00:00:00Z'),
+    makeCountsByDate([]),
+  );
+
+  const svg = renderCalendarSvg(
+    activities,
+    'light',
+    'corvus',
+    themes,
+    translation,
+    locale,
+  );
+
+  assert.doesNotMatch(svg, />Mar<\/text>/);
+  assert.match(svg, />Apr<\/text>/);
 });

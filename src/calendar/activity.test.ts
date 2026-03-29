@@ -46,7 +46,7 @@ test('buildPlotActivities emits week and weekday coordinates for a Monday-first 
         weekIndex: 0,
         weekdayIndex: 0,
         weekdayLabel: 'Mon',
-        monthTick: true,
+        monthTick: false,
       },
       {
         date: '2026-01-27',
@@ -121,6 +121,21 @@ test('buildPlotActivities emits week and weekday coordinates for a Monday-first 
         monthTick: false,
       },
     ],
+  );
+});
+
+test('buildPlotActivities keeps the leading month label when at least two weeks remain in the opening month', () => {
+  const activities = buildPlotActivities(
+    new Date('2026-01-18T00:00:00Z'),
+    new Date('2026-02-03T00:00:00Z'),
+    makeCountsByDate([]),
+  );
+
+  assert.equal(activities[0]?.date, '2026-01-18');
+  assert.equal(activities[0]?.monthTick, true);
+  assert.equal(
+    activities.find((activity) => activity.date === '2026-02-01')?.monthTick,
+    true,
   );
 });
 
